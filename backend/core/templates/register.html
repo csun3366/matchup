@@ -9,15 +9,18 @@
                 <div class="row gx-5 align-items-center">
                     <div class="col-xxl-5">
                         <!-- Header text content-->
-                        <h1 class="fw-bolder">有些心意，登入就會知道答案</h1>
+                        <h1 class="fw-bolder">註冊，輸入名字，等一份可能的心動</h1>
                         </br>
-                        <form method="POST" action="{% url 'login' %}">
+                        <form method="POST" action="{% url 'register' %}">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <input type="text" class="form-control" name="username" placeholder="輸入你的帳號">
                             </div>
                             <div class="mb-3">
-                                <input type="password" class="form-control" name="password" placeholder="輸入你的密碼">
+                                <input type="password" class="form-control" name="password1" placeholder="輸入你的密碼">
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control" name="password2" placeholder="再次輸入你的密碼">
                             </div>
                             {% if messages %}
                                 {% for msg in messages %}
@@ -27,7 +30,7 @@
                                     </div>
                                 {% endfor %}
                             {% endif %}
-                            <button type="submit" class="btn btn-primary">登入</button>
+                            <button type="submit" class="btn btn-primary">註冊</button>
                         </form>
                     </div>
                     <div class="col-xxl-7">
