@@ -48,6 +48,53 @@ def register_user(request):
 
 def input(request):
     if request.method == "POST":
-        pass
+        username = request.user.username
+        self_ig = request.POST.get("self_ig")
+        other_ig = request.POST.get("other_ig")
+        print("username: " + str(request.user.username))
+        print("self_ig: " + str(self_ig))
+        print("other_ig: " + str(other_ig))
+        # 步驟1: 先處理這個username的舊資料
+        print("[INFO] Update old matched mermber ... ")
+        if Member.objects.filter(username=username).exists():
+            member = Member.objects.get(username=username)
+            if member.is_matched:
+                old_self_ig = member.self_ig
+                old_other_ig = member.other_ig
+                if Member.objects.filter(self_ig=old_other_ig, other_ig=old_self_ig).exclude(username=username).exists():
+                    old_match_members = Member.objects.filter(self_ig=old_other_ig, other_ig=old_self_ig).exclude(username=username)
+                    for m in old_match_members:
+                        m.is_matched = False
+                        m.save()
+
+        # 步驟2: 再處理這個username的新資料
+        print("[INFO] Update new mermber ... ")
+        is_matched = False
+        if Member.objects.exclude(username=username).filter(self_ig=other_ig, other_ig=self_ig).exists():
+            # 如果配對成功 更新對方is_matched
+            print("配對成功!!!")
+            match_members = Member.objects.exclude(username=username).filter(self_ig=other_ig, other_ig=self_ig)
+            is_matched = True
+            for m in match_members:
+                m.is_matched = is_matched
+                m.save()
+        else:
+            print("配對失敗!!!")
+            is_matched = False
+
+        # 步驟3: 最後更新或創建這個username的物件
+        member, created = Member.objects.update_or_create(
+            username=username,
+            defaults={
+                'self_ig': self_ig,
+                'other_ig': other_ig,
+                'is_matched' : is_matched
+            }
+        )
+        return render(request, 'result.html', {
+            'is_matched': is_matched,
+            'self_ig' : self_ig,
+            'other_ig' : other_ig
+        })
     else:
         return render(request, 'input.html')

@@ -23,16 +23,17 @@
                             <!-- To make this form functional, sign up at-->
                             <!-- https://startbootstrap.com/solution/contact-forms-->
                             <!-- to get an API token!-->
-                            <form id="contactForm" data-sb-form-api-token="API_TOKEN">
+                            <form method="POST" action="{% url 'input' %}" onsubmit="return validate_ig()">
+                                {% csrf_token %}
                                 <!-- Name input-->
                                 <div class="form-floating mb-3">
-                                    <input class="form-control" type="text" placeholder="Enter your name..." data-sb-validations="required" />
-                                    <label for="name">你的IG帳號</label>
+                                    <input class="form-control" id="self_ig_id" name="self_ig" type="text" placeholder="Enter your name..." data-sb-validations="required" />
+                                    <label for="self_ig_id">你的IG帳號</label>
                                     <div class="invalid-feedback" data-sb-feedback="name:required">A name is required.</div>
                                 </div>
                                 <div class="form-floating mb-3">
-                                    <input class="form-control" type="text" placeholder="Enter your name..." data-sb-validations="required" />
-                                    <label for="name">對方的IG帳號</label>
+                                    <input class="form-control" id="other_ig_id" name="other_ig" type="text" placeholder="Enter your name..." data-sb-validations="required" />
+                                    <label for="other_ig_id">對方的IG帳號</label>
                                     <div class="invalid-feedback" data-sb-feedback="name:required">A name is required.</div>
                                 </div>
                                 <!-- Submit success message-->
@@ -53,7 +54,7 @@
                                 <!-- an error submitting the form-->
                                 <div class="d-none" id="submitErrorMessage"><div class="text-center text-danger mb-3">Error sending message!</div></div>
                                 <!-- Submit Button-->
-                                <div class="d-grid"><button class="btn btn-primary btn-lg disabled" id="submitButton" type="submit">提交</button></div>
+                                <div class="d-grid"><button class="btn btn-primary btn-lg" id="submitButton" type="submit">提交</button></div>
                             </form>
                         </div>
                     </div>
@@ -61,4 +62,19 @@
             </div>
         </section>
     </main>
+
+    <script>
+        function validate_ig() {
+            const self_ig = document.getElementById("self_ig_id").value.trim().toLowerCase();
+            const other_ig = document.getElementById("other_ig_id").value.trim().toLowerCase();
+
+            if (self_ig === other_ig) {
+                alert("兩個 IG 帳號不能相同！");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+
 {% endblock %}

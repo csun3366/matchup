@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <!-- Page content-->
+        <section class="py-5">
+            <div class="container px-5">
+                <!-- Contact form-->
+                <div class="bg-light rounded-4 py-5 px-4 px-md-5">
+                    <div class="text-center mb-5">
+                        <div class="feature bg-primary bg-gradient-primary-to-secondary text-white rounded-3 mb-3"><i class="bi bi-envelope"></i></div>
+                        <h1 class="fw-bolder">我的小秘密</h1>
+                        {% if not is_matched %}
+                        <p class="lead fw-normal text-muted mb-0">{{ self_ig }} 心裡偷偷喜歡著 {{ other_ig }}</p>
+                        <p class="lead fw-normal text-muted mb-0">放心，我們會默默守著這份心意，直到緣分悄悄出現。</p>
+
+                        {% else %}
+                        <p class="lead fw-normal text-muted mb-0">❦ {{ self_ig }} {{ other_ig }} 你們的心，交會了</p>
+                        <p class="lead fw-normal text-muted mb-0">我們已悄悄告訴你們彼此，讓故事繼續延伸下去 🌿</p>
+
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function validate_ig() {
+            const self_ig = document.getElementById("self_ig_id").value.trim().toLowerCase();
+            const other_ig = document.getElementById("other_ig_id").value.trim().toLowerCase();
+
+            if (self_ig === other_ig) {
+                alert("兩個 IG 帳號不能相同！");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+
+{% endblock %}
