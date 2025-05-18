@@ -91,10 +91,29 @@ def input(request):
                 'is_matched' : is_matched
             }
         )
-        return render(request, 'result.html', {
+        return render(request, 'status.html', {
+            'has_input' : True,
             'is_matched': is_matched,
             'self_ig' : self_ig,
             'other_ig' : other_ig
         })
     else:
         return render(request, 'input.html')
+
+def status(request):
+    username = request.user.username
+    if Member.objects.filter(username=username).exists():
+        member = Member.objects.get(username=username)
+        return render(request, 'status.html', {
+            'has_input' : True,
+            'is_matched': member.is_matched,
+            'self_ig' : member.self_ig,
+            'other_ig' : member.other_ig
+        })
+    else:
+        return render(request, 'status.html', {
+            'has_input' : False,
+            'is_matched': False,
+            'self_ig' : "",
+            'other_ig' : ""
+        })

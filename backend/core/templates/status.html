@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <main class="flex-shrink-0">
+        <!-- Page content-->
+        <section class="py-5">
+            <div class="container px-5">
+                <!-- Contact form-->
+                <div class="bg-light rounded-4 py-5 px-4 px-md-5">
+                    <div class="text-center mb-5">
+                        {% if not has_input %}
+                        <img class="profile-img" src="{% static 'assets/favicon.ico' %}" style="width: 8%; height: 8%" alt="..." />
+                        <h1 class="fw-bolder">我的小秘密</h1>
+                        <p class="lead fw-normal text-muted mb-0">還沒寫下你的心意呢，要不要悄悄告訴我們？</p>
+                        <img class="profile-img" src="{% static 'assets/input.png' %}" style="width: 40%; height: 40%" alt="..." />
+                        {% elif not is_matched %}
+                        <img class="profile-img" src="{% static 'assets/favicon.ico' %}" style="width: 8%; height: 8%" alt="..." />
+                        <h1 class="fw-bolder">我的小秘密</h1>
+                        <p class="lead fw-normal text-muted mb-0">{{ self_ig }}，目前還沒收到 {{other_ig}} 的心意</p>
+                        <p class="lead fw-normal text-muted mb-0">放心，我們會默默守著這個秘密，直到緣分悄悄出現。</p>
+                        <img class="profile-img" src="{% static 'assets/fail.png' %}" style="width: 40%; height: 35%" alt="..." />
+
+                        {% else %}
+                        <img class="profile-img" src="{% static 'assets/favicon.ico' %}" style="width: 8%; height: 8%" alt="..." />
+                        <h1 class="fw-bolder">我的小秘密</h1>
+                        <p class="lead fw-normal text-muted mb-0">恭喜!!! {{ self_ig }} 和 {{ other_ig }} 你們的心，交會了</p>
+                        <p class="lead fw-normal text-muted mb-0">我們已悄悄告訴你們彼此，讓故事繼續延伸下去 🌿</p>
+                        <img class="profile-img" src="{% static 'assets/success.png' %}" style="width: 40%; height: 40%" alt="..." />
+
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function validate_ig() {
+            const self_ig = document.getElementById("self_ig_id").value.trim().toLowerCase();
+            const other_ig = document.getElementById("other_ig_id").value.trim().toLowerCase();
+
+            if (self_ig === other_ig) {
+                alert("兩個 IG 帳號不能相同！");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+
+{% endblock %}
