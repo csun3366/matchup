@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from .models import Member
@@ -46,6 +47,7 @@ def register_user(request):
     else:
         return render(request, 'register.html')
 
+@login_required
 def input(request):
     if request.method == "POST":
         username = request.user.username
@@ -100,6 +102,7 @@ def input(request):
     else:
         return render(request, 'input.html')
 
+@login_required
 def status(request):
     username = request.user.username
     if Member.objects.filter(username=username).exists():

@@ -125,6 +125,9 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = ['static/']
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+  # 讓沒有都入的用戶都導向/login/
+LOGIN_URL = '/login/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

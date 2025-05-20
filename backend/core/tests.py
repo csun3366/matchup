@@ -22,3 +22,27 @@ class SimpleTest(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+    def test_input_login_required_view(self):
+        protected_url = reverse('input')
+        response = self.client.get(protected_url)
+        self.assertEqual(response.status_code, 302)  # 未登入時會 redirect 到登入頁
+        self.assertIn('/login/', response.url)
+        # 登入後再訪問
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(protected_url)
+        self.assertEqual(response.status_code, 200)
+    def test_status_login_required_view(self):
+        protected_url = reverse('status')
+        response = self.client.get(protected_url)
+        self.assertEqual(response.status_code, 302)  # 未登入時會 redirect 到登入頁
+        self.assertIn('/login/', response.url)
+        # 登入後再訪問
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(protected_url)
+        self.assertEqual(response.status_code, 200)
+    def test_logout(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('logout'))
+        self.assertEqual(response.status_code, 302)  # 通常登出也會 redirect
+        response = self.client.get('/')  # 再訪問一個頁面來檢查是否已登出
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
