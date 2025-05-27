@@ -1,9 +1,33 @@
+from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.utils.dateparse import parse_datetime
+from django.utils.timesince import timesince
+from django.utils.timezone import now
 from .models import Member
+
+def format_notification_time(timestamp):
+    if not timestamp:
+        return ''
+
+    now_time = now()
+    diff = now_time - timestamp
+
+    if diff < timedelta(minutes=5):
+        return '剛剛'
+    elif diff < timedelta(hours=24):
+        hours = int(diff.total_seconds() // 3600)
+        minutes = int((diff.total_seconds() % 3600) // 60)
+        if hours >= 1:
+            return f"{hours} 小時前"
+        else:
+            return f"{minutes} 分鐘前"
+    else:
+        return timestamp.strftime('%Y/%m/%d')
 
 def home(request):
     return render(request, 'home.html')
@@ -69,6 +93,7 @@ def input(request):
                         m.is_matched = False
                         m.save()
 
+
         # 步驟2: 再處理這個username的新資料
         print("[INFO] Update new mermber ... ")
         is_matched = False
@@ -79,6 +104,7 @@ def input(request):
             is_matched = True
             for m in match_members:
                 m.is_matched = is_matched
+                m.add_notification("與" + str(self_ig) + "成功配對了！")
                 m.save()
         else:
             print("配對失敗!!!")
@@ -93,6 +119,10 @@ def input(request):
                 'is_matched' : is_matched
             }
         )
+        if is_matched:
+            member.add_notification("與" + str(other_ig) + "成功配對了！")
+            member.save()
+
         return render(request, 'status.html', {
             'has_input' : True,
             'is_matched': is_matched,
@@ -120,3 +150,35 @@ def status(request):
             'self_ig' : "",
             'other_ig' : ""
         })
+
+@login_required
+def unread_notification_count(request):
+    print(request.user.username)
+    if Member.objects.filter(username=request.user.username).exists():
+        member = Member.objects.get(username=request.user.username)
+        count = member.unread_count()
+        return JsonResponse({'count': count})
+    else:
+        return JsonResponse({'count': 0})
+
+@login_required
+def notifications(request):
+    if Member.objects.filter(username=request.user.username).exists():
+        member = Member.objects.get(username=request.user.username)
+        messages = []
+        for msg in member.notifications:
+            print(msg['text'])
+        member.mark_all_as_read()
+        member.save()
+        for n in member.notifications:
+            timestamp = parse_datetime(n['timestamp']) if n.get('timestamp') else None
+            messages.append({
+                'text': n['text'],
+                'time': format_notification_time(timestamp),
+                'timestamp': timestamp  # 加入排序用
+            })
+            # 依照 timestamp 排序，None 的會排在最後
+            messages.sort(key=lambda x: x['timestamp'] or parse_datetime('1900-01-01T00:00:00'), reverse=True)
+        return JsonResponse({'notifications': messages})
+    else:
+        return JsonResponse({'notifications': []})

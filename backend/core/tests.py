@@ -1,6 +1,8 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.timezone import now
+from .models import Member
 
 class SimpleTest(TestCase):
     def setUp(self):
@@ -46,3 +48,31 @@ class SimpleTest(TestCase):
         self.assertEqual(response.status_code, 302)  # 通常登出也會 redirect
         response = self.client.get('/')  # 再訪問一個頁面來檢查是否已登出
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+class NotificationAPITestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.member = Member.objects.create(username='testuser', notifications=[
+            {'text': '你被配對了！', 'timestamp': now().isoformat(), 'read': False},
+            {'text': '有人喜歡你！', 'timestamp': now().isoformat(), 'read': True}
+        ])
+
+    def test_unread_count(self):
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.get('/unread_notification_count/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['count'], 1)
+    
+    def test_get_notifications_marks_as_read(self):
+        self.client.login(username='testuser', password='testpass')
+        response = self.client.get('/notifications/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data['notifications']), 2)
+        self.assertTrue(all('time' in n for n in data['notifications']))
+
+        self.member.refresh_from_db()
+        for n in self.member.notifications:
+            self.assertTrue(n.get('read'))

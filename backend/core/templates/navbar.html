@@ -10,6 +10,17 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'input' %}">輸入心意</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'status' %}">查看回音</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">登出</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                0
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" id="notification-menu">
+                            <li><span class="dropdown-item-text">載入中...</span></li>
+                        </ul>
+                    </li>
                 {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">登入</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">註冊</a></li>
@@ -18,3 +29,44 @@
         </div>
     </div>
 </nav>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $.get('/unread_notification_count', function(data) {
+        if (data['count'] > 0) {
+            $('#notification-badge').text(data['count']).show();
+        } else {
+            $('#notification-badge').hide();
+            console.log("No count");
+        }
+        });
+    });
+
+    $('#notificationDropdown').on('click', function () {
+        $.ajax({
+            url: '{% url "notifications" %}',
+            method: 'GET',
+            success: function (data) {
+                let menu = $('#notification-menu');
+                menu.empty();
+                if (data['notifications'].length === 0) {
+                    menu.append('<li><span class="dropdown-item-text">目前沒有新通知</span></li>');
+                } else {
+                    data['notifications'].forEach(function (notif) {
+                        const html = `
+                            <li>
+                            <span class="dropdown-item bg-light rounded-3 shadow-sm px-3 py-2 mb-2 border notification-item">
+                                <div class="fw-semibold">${notif['text']}</div>
+                                <div><small class="text-muted">${notif['time']}</small></div>
+                            </span>
+                            </li>`;
+                        menu.append(html);
+                    });
+                }
+
+                // 重設紅圈數字與隱藏
+                $('#notification-badge').text('0').hide();
+            }
+        });
+    });
+</script>
